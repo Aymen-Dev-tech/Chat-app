@@ -3,13 +3,26 @@ import expressHandlebars from 'express-handlebars'
 import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config'
+import { db } from './db.js'
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import initializeRoutes from './routes/routes.js';
 
 
 
 const app = express()
 const port = process.env.PORT || 3000
 
-
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create(db),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24,
+    }
+}));
+initializeRoutes(app);
 // configure Handlebars view engine
 app.engine('handlebars', expressHandlebars.engine({
     defaultLayout: 'main',
@@ -22,13 +35,8 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.get('/', (req, res) => {
-    res.render('landing')
-})
 
-app.get('/login', (req, res) => {
-    res.render('login')
-})
+
 
 
 
