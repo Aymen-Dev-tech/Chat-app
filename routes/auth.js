@@ -1,7 +1,7 @@
 import express from 'express'
 import passport from 'passport';
 import FacebookStrategy from 'passport-facebook'
-import GoogleStrategy from 'passport-google-oidc'
+import GoogleStrategy from 'passport-google-oauth20'
 import * as db from '../db.js';
 const router = express.Router();
 
@@ -14,13 +14,15 @@ passport.deserializeUser((id, done) => {
 })
 
 
-// configure Facebook strategy
+// configure & register Facebook strategy
 passport.use(new FacebookStrategy({
     clientID: process.env.FB_APP_ID,
     clientSecret: process.env.FB_APP_SECRET,
     callbackURL: '/oauth2/redirect/facebook',
-    state: true
+    state: true,
+    profileFields: ['id', 'displayName', 'photos', 'email']
 }, (accessToken, refreshToken, profile, done) => {
+    console.log('user profile fb: ', profile);
     const authId = 'facebook:' + profile.id
     db.getUserByAuthId(authId)
         .then(user => {
@@ -28,6 +30,7 @@ passport.use(new FacebookStrategy({
             db.addUser({
                 authId: authId,
                 name: profile.displayName,
+                picture: profile.photos[0].value,
                 created: new Date()
             })
                 .then(user => done(null, user))
@@ -44,8 +47,8 @@ passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: '/oauth2/redirect/google',
-    scope: ['profile']
 }, (token, tokenSecret, profile, done) => {
+    console.log('google profile: ', profile);
     const authId = 'google:' + profile.id
     db.getUserByAuthId(authId)
         .then(user => {
@@ -53,7 +56,9 @@ passport.use(new GoogleStrategy({
             db.addUser({
                 authId: authId,
                 name: profile.displayName,
+                picture: profile.photos[0].value,
                 created: new Date(),
+
             })
                 .then(user => done(null, user))
                 .catch(err => done(err, null))
@@ -64,6 +69,7 @@ passport.use(new GoogleStrategy({
         })
 }))
 router.get('/login', (req, res) => {
+    if(req.user) res.redirect('/')
     res.render('login')
 })
 //redircet the user to fb
@@ -74,9 +80,14 @@ router.get('/oauth2/redirect/facebook', passport.authenticate('facebook', {
 }));
 
 router.get('/login/federated/google', passport.authenticate('google'));
-router.get('/oauth2/redirect/google', passport.authenticate('google', {
-    successRedirect: '/',
-    failureRedirect: '/login'
-}));
+router.get('/auth/google',
+    passport.authenticate('google', { scope: ['profile'] }));
+
+router.get('/oauth2/redirect/google',
+    passport.authenticate('google', { failureRedirect: '/login' }),
+    function (req, res) {
+        // Successful authentication, redirect home.
+        res.redirect('/');
+    });
 
 export default router

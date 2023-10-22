@@ -7,7 +7,7 @@ import { db } from './db.js'
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import initializeRoutes from './routes/routes.js';
-
+import passport from 'passport';
 
 
 const app = express()
@@ -22,6 +22,7 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24,
     }
 }));
+app.use(passport.session());
 initializeRoutes(app);
 // configure Handlebars view engine
 app.engine('handlebars', expressHandlebars.engine({
