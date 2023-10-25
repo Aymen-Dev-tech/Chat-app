@@ -8,10 +8,28 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import initializeRoutes from './routes/routes.js';
 import passport from 'passport';
+import { Server } from 'socket.io';
+import { createServer } from 'http';
 
-
+//init express 
 const app = express()
+//inint http server
+const server = createServer(app)
+// init socket server
+const io = new Server(server)
 const port = process.env.PORT || 3000
+/* io.on("connection", (socket) => {
+    const users = [];
+    for (let [id, socket] of io.of("/").sockets) {
+        users.push({
+            userID: id,
+            username: socket.username,
+        });
+    }
+    socket.emit("users", users);
+    // ...
+}) */;
+
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -19,6 +37,7 @@ app.use(session({
     saveUninitialized: false,
     store: MongoStore.create(db),
     cookie: {
+        secure: false,
         maxAge: 1000 * 60 * 60 * 24,
     }
 }));
@@ -36,7 +55,15 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-
+io.use((socket, next) => {
+    const username = socket.handshake.auth.username;
+    if (!username) {
+        return next(new Error("invalid username"));
+    }
+    socket.username = username;
+    console.log('a new user has been connected: ', username);
+    next();
+});
 
 
 
@@ -60,6 +87,6 @@ app.use((err, req, res, next) => {
     res.status(500)
     res.send('500 - Server Error')
 })
-app.listen(port, () => console.log(
+server.listen(port, () => console.log(
     `Express started on http://localhost:${port}; ` +
     `press Ctrl-C to terminate.`))
