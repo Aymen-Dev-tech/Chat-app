@@ -10,6 +10,8 @@ import initializeRoutes from './routes/routes.js';
 import passport from 'passport';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
+import crypto from 'crypto'
+import InMemorySessionStore from "./sessionStore.js";
 
 //init express 
 const app = express()
@@ -54,18 +56,95 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, 'public')))
+const randomId = () => crypto.randomBytes(8).toString("hex");
 
+const sessionStore = new InMemorySessionStore();
 io.use((socket, next) => {
+    console.log('<SERVER> about to set session IDs')
+    const sessionID = socket.handshake.auth.sessionID;
+    console.log('Session id: ', sessionID)
+    if (sessionID) {
+        const session = sessionStore.findSession(sessionID);
+        if (session) {
+            socket.sessionID = sessionID;
+            socket.userID = session.userID;
+            socket.username = session.username;
+            return next();
+        }
+    }
     const username = socket.handshake.auth.username;
     if (!username) {
         return next(new Error("invalid username"));
     }
+    socket.sessionID = randomId();
+    socket.userID = randomId();
     socket.username = username;
-    console.log('a new user has been connected: ', username);
     next();
 });
 
+io.on("connection", (socket) => {
+    // persist session
+    console.log('inside connection event')
+    sessionStore.saveSession(socket.sessionID, {
+        userID: socket.userID,
+        username: socket.username,
+        connected: true,
+    });
 
+    // emit session details
+    socket.emit("session", {
+        sessionID: socket.sessionID,
+        userID: socket.userID,
+    });
+
+    // join the "userID" room
+    socket.join(socket.userID);
+
+    // fetch existing users
+    const users = [];
+    sessionStore.findAllSessions().forEach((session) => {
+        users.push({
+            userID: session.userID,
+            username: session.username,
+            connected: session.connected,
+        });
+        console.log("<SERVER> sending all connected users: ", users)
+    });
+    socket.emit("users", users);
+
+    // notify existing users
+    socket.broadcast.emit("user connected", {
+        userID: socket.userID,
+        username: socket.username,
+        connected: true,
+    });
+    // forward the private message to the right recipient
+    socket.on("private message", ({ content, senderDetails, to }) => {
+        console.log(`sending ${content} to ${to}`);
+        socket.to(to).to(socket.userID).emit("private message", {
+            content,
+            senderDetails,
+            from: socket.userID,
+            to,
+        });
+    });
+
+    // notify users upon disconnection
+    socket.on("disconnect", async () => {
+        const matchingSockets = await io.in(socket.userID).allSockets();
+        const isDisconnected = matchingSockets.size === 0;
+        if (isDisconnected) {
+            // notify other users
+            socket.broadcast.emit("user disconnected", socket.userID);
+            // update the connection status of the session
+            sessionStore.saveSession(socket.sessionID, {
+                userID: socket.userID,
+                username: socket.username,
+                connected: false,
+            });
+        }
+    });
+});
 
 
 

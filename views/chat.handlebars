@@ -70,14 +70,13 @@
                         </div>
                         {{#each accounts}}
                         <a href="#" class="list-group-item list-group-item-action border-0">
-                            <div class="d-flex align-items-start">
-                                <img src="{{_doc.picture}}" class="rounded-circle mr-1" alt="{{_doc.name}}" width="40"
-                                    height="40">
+                            <div class="d-flex align-items-start " onclick="setSelectedAccount(this)">
+                                <img id="img" src="{{_doc.picture}}" class="rounded-circle mr-1" alt="{{_doc.name}}"
+                                    width="40" height="40">
                                 <div id="account-name" class="flex-grow-1 ml-3">
                                     {{_doc.name}}
                                 </div>
                             </div>
-                            {{!-- <div> {{name}} - {{picture}} </div> --}}
                         </a>
                         {{/each}}
                         <hr class="d-block d-lg-none mt-1 mb-0">
@@ -86,12 +85,12 @@
                         <div class="py-2 px-4 border-bottom d-none d-lg-block">
                             <div class="d-flex align-items-center py-1">
                                 <div class="position-relative">
-                                    <img src="https://bootdey.com/img/Content/avatar/avatar3.png"
-                                        class="rounded-circle mr-1" alt="Sharon Lessman" width="40" height="40">
+                                    <img id="selectedAccountImg" src="{{firstUserPicture}}" class="rounded-circle mr-1"
+                                        alt="Sharon Lessman" width="40" height="40">
                                 </div>
                                 <div class="flex-grow-1 pl-3">
-                                    <strong>Sharon Lessman</strong>
-                                    <div class="text-muted small"><em>Typing...</em></div>
+                                    <strong id="selectedAccountName">{{firstUserName}}</strong>
+                                    <div class="text-muted small"></div>
                                 </div>
                                 <div>
                                     <button class="btn btn-primary btn-lg mr-1 px-3"><svg
@@ -123,83 +122,42 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="position-relative">
-                            <div class="chat-messages p-4">
-                                <div class="chat-message-right pb-4">
-                                    <div>
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png"
-                                            class="rounded-circle mr-1" alt="Chris Wood" width="40" height="40">
-                                        <div class="text-muted small text-nowrap mt-2">2:33 am</div>
-                                    </div>
-                                    <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
-                                        <div class="font-weight-bold mb-1">You</div>
-                                        Lorem ipsum dolor sit amet, vis erat denique in, dicunt prodesset te vix.
-                                    </div>
+                        <ul class="chat-messages-list p-4" id="chatMessages">
+                            <!-- Added parent ul with class 'chat-messages-list' -->
+                            <li class="chat-message-right pb-4">
+                                <!-- Changed div to li with class 'chat-message-right' -->
+                                <div>
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar1.png"
+                                        class="rounded-circle mr-1" alt="Chris Wood" width="40" height="40">
+                                    <div class="text-muted small text-nowrap mt-2">2:33 am</div>
                                 </div>
-                                <div class="chat-message-left pb-4">
-                                    <div>
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png"
-                                            class="rounded-circle mr-1" alt="Sharon Lessman" width="40" height="40">
-                                        <div class="text-muted small text-nowrap mt-2">2:34 am</div>
-                                    </div>
-                                    <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
-                                        <div class="font-weight-bold mb-1">Sharon Lessman</div>
-                                        Sit meis deleniti eu, pri vidit meliore docendi ut, an eum erat animal commodo.
-                                    </div>
+                                <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+                                    <div class="font-weight-bold mb-1">You</div>
+                                    Lorem ipsum dolor sit amet, vis erat denique in, dicunt prodesset te vix.
                                 </div>
-                                <div class="chat-message-right mb-4">
-                                    <div>
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png"
-                                            class="rounded-circle mr-1" alt="Chris Wood" width="40" height="40">
-                                        <div class="text-muted small text-nowrap mt-2">2:35 am</div>
-                                    </div>
-                                    <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
-                                        <div class="font-weight-bold mb-1">You</div>
-                                        Cum ea graeci tractatos.
-                                    </div>
+                            </li>
+                            <li class="chat-message-left pb-4">
+                                <!-- Changed div to li with class 'chat-message-left' -->
+                                <div>
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar3.png"
+                                        class="rounded-circle mr-1" alt="Sharon Lessman" width="40" height="40">
+                                    <div class="text-muted small text-nowrap mt-2">2:34 am</div>
                                 </div>
-                                <div class="chat-message-left pb-4">
-                                    <div>
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png"
-                                            class="rounded-circle mr-1" alt="Sharon Lessman" width="40" height="40">
-                                        <div class="text-muted small text-nowrap mt-2">2:36 am</div>
-                                    </div>
-                                    <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
-                                        <div class="font-weight-bold mb-1">Sharon Lessman</div>
-                                        Sed pulvinar, massa vitae interdum pulvinar, risus lectus porttitor magna, vitae
-                                        commodo lectus mauris et velit.
-                                        Proin ultricies placerat imperdiet. Morbi varius quam ac venenatis tempus.
-                                    </div>
+                                <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
+                                    <div class="font-weight-bold mb-1">Sharon Lessman</div>
+                                    Sit meis deleniti eu, pri vidit meliore docendi ut, an eum erat animal commodo.
                                 </div>
-                                <div class="chat-message-left pb-4">
-                                    <div>
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png"
-                                            class="rounded-circle mr-1" alt="Sharon Lessman" width="40" height="40">
-                                        <div class="text-muted small text-nowrap mt-2">2:37 am</div>
-                                    </div>
-                                    <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
-                                        <div class="font-weight-bold mb-1">Sharon Lessman</div>
-                                        Cras pulvinar, sapien id vehicula aliquet, diam velit elementum orci.
-                                    </div>
-                                </div>
-                                <div class="chat-message-right mb-4">
-                                    <div>
-                                        <img src="https://bootdey.com/img/Content/avatar/avatar1.png"
-                                            class="rounded-circle mr-1" alt="Chris Wood" width="40" height="40">
-                                        <div class="text-muted small text-nowrap mt-2">2:38 am</div>
-                                    </div>
-                                    <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
-                                        <div class="font-weight-bold mb-1">You</div>
-                                        Lorem ipsum dolor sit amet, vis erat denique in, dicunt prodesset te vix.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            </li>
+                        </ul>
+
                         <div class="flex-grow-0 py-3 px-4 border-top">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Type your message">
-                                <button class="btn btn-primary">Send</button>
-                            </div>
+                            <form id="messageForm"> <!-- Added a form element with id 'messageForm' -->
+                                <div class="input-group">
+                                    <input id="input" type="text" class="form-control" placeholder="Type your message">
+                                    <button type="submit" class="btn btn-primary">Send</button>
+                                    <!-- Added type="submit" -->
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -210,9 +168,172 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
+
+        let selectedAccount = '{{firstUserName}}'
+        let selectedAccountImage = '{{firstUserPicture}}'
+        let accounts = null
+        let senderDetails = {}
+        const form = document.getElementById('messageForm')
+        const input = document.getElementById('input')
+        const setSelectedAccount = (element) => {
+            selectedAccount = element.querySelector('div').innerText.trim()
+            selectedAccountImage = element.querySelector('img').getAttribute('src')
+            //updating current chat friend details
+            document.getElementById('selectedAccountName').innerText = selectedAccount
+            document.getElementById('selectedAccountImg').src = selectedAccountImage
+            console.log("setting the selected account: ", selectedAccount)
+            console.log("setting the selected account img: ", selectedAccountImage)
+        }
+
+        const getUserIdByUsername = () => {
+            console.log('all accounts in seconde user: ', accounts)
+            const filtredArray = accounts.filter(user => user.username === selectedAccount && user.connected === true)
+            console.log('fitred array in seconde user: ', filtredArray)
+            return filtredArray[0].userID
+        }
+        const getTime = () => {
+            const now = new Date()
+            return `${now.getHours()}:${now.getMinutes()}`
+        }
+
+        //init client
         const socket = io({ autoConnect: false });
         const username = "{{ username }}";
+        const picture = "{{picture}}"
         console.log("i recieved the name: ", username)
-        socket.auth = { username }
-        socket.connect()
+
+        //recieve all online users
+        socket.on("users", (users) => {
+            users.forEach((user) => {
+                user.self = user.userID === socket.id;
+            });
+            accounts = users
+            console.log('first connection, setting all accounts: ', accounts)
+        });
+
+        //update list of account when a new user connects
+        socket.on("user connected", (user) => {
+            for (let i = 0; i < accounts.length; i++) {
+                const existingUser = accounts[i];
+                if (existingUser.userID === user.userID) {
+                    existingUser.connected = true;
+                    return;
+                }
+            }
+            accounts.push(user);
+        });
+        //sendig the message 
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevents the default form submission behavior
+            if (input.value.trim()) {
+                const message = input.value;
+                console.log('Message submitted:', message);
+                senderDetails.name = username 
+                senderDetails.image = picture 
+                socket.emit("private message", {
+                    content: message,
+                    senderDetails: senderDetails,
+                    to: getUserIdByUsername(),
+                });
+                input.value = ''
+                const chatMessages = document.getElementById('chatMessages');
+                const newMessageLi = document.createElement('li');
+                newMessageLi.className = 'chat-message-right pb-4';
+                newMessageLi.innerHTML = `
+                <div>
+                    <img src='${picture}'
+                        class="rounded-circle mr-1" alt="You" width="40" height="40">
+                    <div class="text-muted small text-nowrap mt-2">${getTime()}</div>
+                </div>
+                <div class="flex-shrink-1 bg-light rounded py-2 px-3 mr-3">
+                    <div class="font-weight-bold mb-1">You</div>
+                    ${message}
+                </div>
+                
+            `;
+                console.log('setting sender details: ', senderDetails)
+                chatMessages.appendChild(newMessageLi);
+                window.scrollTo(0, document.body.scrollHeight);
+
+            }
+        });
+
+        //recieve the private event
+        socket.on("private message", ({ content, senderDetails,  from }) => {
+            console.log(`i recieved ${content} from ${from}`)
+            console.log("accounts in private message reciever: ", accounts)
+            const chatMessages = document.getElementById('chatMessages');
+            const newMessageLi = document.createElement('li');
+            newMessageLi.className = 'chat-message-left pb-4';
+            newMessageLi.innerHTML = `
+                <div>
+                    <img src=${senderDetails.image}
+                         class="rounded-circle mr-1" alt="Sharon Lessman" width="40" height="40">
+                        <div class="text-muted small text-nowrap mt-2">${getTime()}</div>
+                </div>
+                <div class="flex-shrink-1 bg-light rounded py-2 px-3 ml-3">
+                    <div class="font-weight-bold mb-1">${senderDetails.name}</div>
+                    ${content}
+                </div>
+                
+            `;
+        
+            chatMessages.appendChild(newMessageLi);
+            window.scrollTo(0, document.body.scrollHeight);
+
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            const sessionID = localStorage.getItem("sessionID");
+
+            if (sessionID) {
+                socket.auth = { sessionID };
+                socket.connect();
+            }
+
+            socket.auth = { username }
+            socket.connect()
+
+            socket.on("session", ({ sessionID, userID }) => {
+                console.log('i recieved session')
+                socket.auth = { sessionID };
+                localStorage.setItem("sessionID", sessionID);
+                socket.userID = userID;
+            });
+
+            socket.on("connect_error", (err) => {
+                if (err.message === "invalid username") {
+                    // Assuming you have a way to handle this in your application
+                    console.log('connect_error: ', err)
+                }
+            });
+        });
+        socket.on("disconnect", () => {
+            accounts.forEach((user) => {
+                if (user.self) {
+                    user.connected = false;
+                }
+            });
+        });
+        socket.on("user disconnected", (id) => {
+            for (let i = 0; i < accounts.length; i++) {
+                const user = accounts[i];
+                if (user.userID === id) {
+                    user.connected = false;
+                    break;
+                }
+            }
+        });
+        //remove events when the user reload or exist the page
+        window.addEventListener('beforeunload', (event) => {
+            console.log('disconnecting......',)
+            socket.off("disconnect");
+            socket.off("users");
+            socket.off("user connected");
+            socket.off("user disconnected");
+            socket.off("private message");
+            socket.off("connect_error");
+        });
+
+        //send a private message 
+
     </script>

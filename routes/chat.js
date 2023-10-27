@@ -11,12 +11,13 @@ const checkAuth = (req, res, next) => {
 
 router.get('/messages', checkAuth, async (req, res) => {
     const users = await userModel.find({})
-    const accounts = users.map(user => {
-        const { _id, ...rest } = user;
-        return rest;
-    });
+    const accounts = users.filter(user => user.name != req.user.name);
     try {
-        res.render('chat', { accounts: accounts, username: req.user.name })
+        res.render('chat', { accounts: accounts, 
+                             username: req.user.name, 
+                             picture: req.user.picture, 
+                             firstUserName: accounts[0].name,
+                             firstUserPicture: accounts[0].picture })
     } catch (error) {
         console.log("error on /messages endpoint: ", error)
         res.status(500).send(error);
