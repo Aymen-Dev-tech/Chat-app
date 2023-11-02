@@ -76,15 +76,17 @@ io.use((socket, next) => {
     if (!username) {
         return next(new Error("invalid username"));
     }
+    console.log('about to generate new session ID !');
     socket.sessionID = randomId();
     socket.userID = randomId();
     socket.username = username;
+    console.log('session id generattion completed !');
     next();
 });
 
 io.on("connection", (socket) => {
     // persist session
-    console.log('inside connection event')
+    console.log('inside connection event: saving session on the memory')
     sessionStore.saveSession(socket.sessionID, {
         userID: socket.userID,
         username: socket.username,
@@ -108,11 +110,17 @@ io.on("connection", (socket) => {
             username: session.username,
             connected: session.connected,
         });
-        console.log("<SERVER> sending all connected users: ", users)
+
     });
+    console.log("<SERVER> sending all connected users: ", users)
     socket.emit("users", users);
 
     // notify existing users
+    console.log("<SERVER> a new user connected notify others: ", {
+        userID: socket.userID,
+        username: socket.username,
+        connected: true,
+    })
     socket.broadcast.emit("user connected", {
         userID: socket.userID,
         username: socket.username,
@@ -169,3 +177,16 @@ app.use((err, req, res, next) => {
 server.listen(port, () => console.log(
     `Express started on http://localhost:${port}; ` +
     `press Ctrl-C to terminate.`))
+// Assuming you have a trigger to signal server shutdown
+process.on('SIGINT', () => {
+    console.log('Server is about to disconnect');
+
+    // Notify all connected clients about the server shutdown
+    io.emit('server_about_to_disconnect', { message: 'Server is about to disconnect' });
+
+    // Close the server
+    server.close(() => {
+        console.log('Server disconnected');
+        process.exit(0);
+    });
+});

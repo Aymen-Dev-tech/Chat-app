@@ -168,7 +168,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-
+        let usernameAlreadySelected = false
         let selectedAccount = '{{firstUserName}}'
         let selectedAccountImage = '{{firstUserPicture}}'
         let accounts = null
@@ -181,14 +181,11 @@
             //updating current chat friend details
             document.getElementById('selectedAccountName').innerText = selectedAccount
             document.getElementById('selectedAccountImg').src = selectedAccountImage
-            console.log("setting the selected account: ", selectedAccount)
-            console.log("setting the selected account img: ", selectedAccountImage)
+
         }
 
         const getUserIdByUsername = () => {
-            console.log('all accounts in seconde user: ', accounts)
             const filtredArray = accounts.filter(user => user.username === selectedAccount && user.connected === true)
-            console.log('fitred array in seconde user: ', filtredArray)
             return filtredArray[0].userID
         }
         const getTime = () => {
@@ -197,18 +194,42 @@
         }
 
         //init client
-        const socket = io({ autoConnect: false });
         const username = "{{ username }}";
         const picture = "{{picture}}"
-        console.log("i recieved the name: ", username)
+        const socket = io({ autoConnect: false });
+        const sessionID = localStorage.getItem("sessionID");
+        console.log("i retrieved the following sessionID from the session: ", sessionID)
+        if (sessionID) {
+            console.log("socket auth based on the session")
+            usernameAlreadySelected = true
+            socket.auth = { sessionID };
+            socket.connect();
+        }
+        if (!usernameAlreadySelected) {
+            console.log("socket auth based on the username")
+            usernameAlreadySelected = true
+            socket.auth = { username }
+            socket.connect()
+        }
+        socket.on("session", ({ sessionID, userID }) => {
+            console.log('i recieved session: ', sessionID)
+            socket.auth = { sessionID };
+            localStorage.setItem("sessionID", sessionID);
+            socket.userID = userID;
+        });
 
+        socket.on("connect_error", (err) => {
+            if (err.message === "invalid username") {
+                // Assuming you have a way to handle this in your application
+                console.log('connect_error: ', err)
+            }
+        });
         //recieve all online users
         socket.on("users", (users) => {
             users.forEach((user) => {
                 user.self = user.userID === socket.id;
             });
             accounts = users
-            console.log('first connection, setting all accounts: ', accounts)
         });
 
         //update list of account when a new user connects
@@ -227,9 +248,8 @@
             event.preventDefault(); // Prevents the default form submission behavior
             if (input.value.trim()) {
                 const message = input.value;
-                console.log('Message submitted:', message);
-                senderDetails.name = username 
-                senderDetails.image = picture 
+                senderDetails.name = username
+                senderDetails.image = picture
                 socket.emit("private message", {
                     content: message,
                     senderDetails: senderDetails,
@@ -251,7 +271,6 @@
                 </div>
                 
             `;
-                console.log('setting sender details: ', senderDetails)
                 chatMessages.appendChild(newMessageLi);
                 window.scrollTo(0, document.body.scrollHeight);
 
@@ -259,7 +278,7 @@
         });
 
         //recieve the private event
-        socket.on("private message", ({ content, senderDetails,  from }) => {
+        socket.on("private message", ({ content, senderDetails, from }) => {
             console.log(`i recieved ${content} from ${from}`)
             console.log("accounts in private message reciever: ", accounts)
             const chatMessages = document.getElementById('chatMessages');
@@ -277,35 +296,14 @@
                 </div>
                 
             `;
-        
+
             chatMessages.appendChild(newMessageLi);
             window.scrollTo(0, document.body.scrollHeight);
 
         });
         document.addEventListener('DOMContentLoaded', function () {
-            const sessionID = localStorage.getItem("sessionID");
+            console.log("<DOMContentLoaded>")
 
-            if (sessionID) {
-                socket.auth = { sessionID };
-                socket.connect();
-            }
-
-            socket.auth = { username }
-            socket.connect()
-
-            socket.on("session", ({ sessionID, userID }) => {
-                console.log('i recieved session')
-                socket.auth = { sessionID };
-                localStorage.setItem("sessionID", sessionID);
-                socket.userID = userID;
-            });
-
-            socket.on("connect_error", (err) => {
-                if (err.message === "invalid username") {
-                    // Assuming you have a way to handle this in your application
-                    console.log('connect_error: ', err)
-                }
-            });
         });
         socket.on("disconnect", () => {
             accounts.forEach((user) => {
@@ -323,8 +321,14 @@
                 }
             }
         });
+        socket.on('server_about_to_disconnect', (data) => {
+            console.log(data.message);
+            localStorage.clear()
+        });
         //remove events when the user reload or exist the page
+        let isTabClosing = false;
         window.addEventListener('beforeunload', (event) => {
+            isTabClosing = true;
             console.log('disconnecting......',)
             socket.off("disconnect");
             socket.off("users");
@@ -333,7 +337,6 @@
             socket.off("private message");
             socket.off("connect_error");
         });
-
         //send a private message 
 
     </script>
