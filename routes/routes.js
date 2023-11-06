@@ -8,5 +8,5 @@ export default (app) => {
 
   app.use('/', indexRouter);
   app.use('/', authRouter);
-  app.use('/chat', chatRouter)
+  app.use('/', chatRouter)
 };

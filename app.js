@@ -12,6 +12,8 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import crypto from 'crypto'
 import InMemorySessionStore from "./sessionStore.js";
+import InMemoryMessageStore from "./messageStore.js"
+
 
 //init express 
 const app = express()
@@ -20,19 +22,6 @@ const server = createServer(app)
 // init socket server
 const io = new Server(server)
 const port = process.env.PORT || 3000
-/* io.on("connection", (socket) => {
-    const users = [];
-    for (let [id, socket] of io.of("/").sockets) {
-        users.push({
-            userID: id,
-            username: socket.username,
-        });
-    }
-    socket.emit("users", users);
-    // ...
-}) */;
-
-
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
@@ -46,9 +35,7 @@ app.use(session({
 app.use(passport.session());
 initializeRoutes(app);
 // configure Handlebars view engine
-app.engine('handlebars', expressHandlebars.engine({
-    defaultLayout: 'main',
-}))
+app.engine('handlebars', expressHandlebars.engine())
 app.set('view engine', 'handlebars')
 // setup the public directory 
 
@@ -59,6 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 const randomId = () => crypto.randomBytes(8).toString("hex");
 
 const sessionStore = new InMemorySessionStore();
+const messageStore = new InMemoryMessageStore();
 io.use((socket, next) => {
     console.log('<SERVER> about to set session IDs')
     const sessionID = socket.handshake.auth.sessionID;
@@ -91,6 +79,7 @@ io.on("connection", (socket) => {
         userID: socket.userID,
         username: socket.username,
         connected: true,
+        messages: [],
     });
 
     // emit session details
@@ -104,15 +93,28 @@ io.on("connection", (socket) => {
 
     // fetch existing users
     const users = [];
+    const messagesPerUser = new Map();
+    messageStore.findMessagesForUser(socket.userID).forEach((message) => {
+        console.log("the content of the message obj: ", message);
+        const { from, to } = message;
+        const otherUser = socket.userID === from ? to : from;
+        if (messagesPerUser.has(otherUser)) {
+            messagesPerUser.get(otherUser).push(message);
+        } else {
+            messagesPerUser.set(otherUser, [message]);
+        }
+    });
+
     sessionStore.findAllSessions().forEach((session) => {
         users.push({
             userID: session.userID,
             username: session.username,
             connected: session.connected,
+            messages: messagesPerUser.get(session.userID) || [],
         });
 
     });
-    console.log("<SERVER> sending all connected users: ", users)
+    console.log("<SERVER> sending all connected users along with there messages: ", users)
     socket.emit("users", users);
 
     // notify existing users
@@ -125,25 +127,36 @@ io.on("connection", (socket) => {
         userID: socket.userID,
         username: socket.username,
         connected: true,
+        messages: []
     });
     // forward the private message to the right recipient
-    socket.on("private message", ({ content, senderDetails, to }) => {
+    socket.on("private message", ({ content, senderDetails, to, time }) => {
         console.log(`sending ${content} to ${to}`);
-        socket.to(to).to(socket.userID).emit("private message", {
+        const message = {
             content,
             senderDetails,
             from: socket.userID,
             to,
-        });
+            time
+        }
+        socket.to(to).to(socket.userID).emit("private message", message);
+        console.log('<SERVER> adding new message to messages store: ', message);
+        messageStore.saveMessage(message)
     });
+    socket.on('switching_account', (accounts) =>{
+        console.log("<SERVER> i have bean notified about the swithing")
+        socket.emit("update_messages", users)
+    })
 
     // notify users upon disconnection
     socket.on("disconnect", async () => {
+        console.log("user disconnected")
         const matchingSockets = await io.in(socket.userID).allSockets();
         const isDisconnected = matchingSockets.size === 0;
         if (isDisconnected) {
             // notify other users
             socket.broadcast.emit("user disconnected", socket.userID);
+            console.log("user disconnected", socket.userID)
             // update the connection status of the session
             sessionStore.saveSession(socket.sessionID, {
                 userID: socket.userID,
@@ -153,13 +166,6 @@ io.on("connection", (socket) => {
         }
     });
 });
-
-
-
-
-
-
-
 
 // custom 404 page
 app.use((req, res) => {
@@ -176,8 +182,10 @@ app.use((err, req, res, next) => {
 })
 server.listen(port, () => console.log(
     `Express started on http://localhost:${port}; ` +
-    `press Ctrl-C to terminate.`))
+        `press Ctrl-C to terminate.`))
+        
 // Assuming you have a trigger to signal server shutdown
+
 process.on('SIGINT', () => {
     console.log('Server is about to disconnect');
 

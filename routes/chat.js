@@ -9,15 +9,22 @@ const checkAuth = (req, res, next) => {
     res.redirect('/login')
 }
 
-router.get('/messages', checkAuth, async (req, res) => {
+router.get('/chat', checkAuth, async (req, res) => {
     const users = await userModel.find({})
     const accounts = users.filter(user => user.name != req.user.name);
+    const style = `
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/chat.css" rel="stylesheet">
+    `
     try {
-        res.render('chat', { accounts: accounts, 
-                             username: req.user.name, 
-                             picture: req.user.picture, 
-                             firstUserName: accounts[0].name,
-                             firstUserPicture: accounts[0].picture })
+        res.render('chat', {
+            accounts: accounts,
+            username: req.user.name,
+            picture: req.user.picture,
+            firstUserName: accounts[0].name,
+            firstUserPicture: accounts[0].picture,
+            style: style,
+        })
     } catch (error) {
         console.log("error on /messages endpoint: ", error)
         res.status(500).send(error);

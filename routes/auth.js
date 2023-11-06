@@ -68,12 +68,26 @@ passport.use(new GoogleStrategy({
 }))
 router.get('/login', (req, res) => {
     if (req.user) res.redirect('/')
-    res.render('login')
+    const style = `
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="fonts/icomoon/style.css">
+
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+
+    <!-- Style -->
+    <link rel="stylesheet" href="css/login.css">
+
+    `
+    res.render('login', { style: style })
 })
 //redircet the user to fb
 router.get('/login/federated/facebook', passport.authenticate('facebook'));
 router.get('/oauth2/redirect/facebook', passport.authenticate('facebook', {
-    successRedirect: '/chat/messages',
+    successRedirect: '/chat',
     failureRedirect: '/login'
 }));
 
@@ -84,7 +98,7 @@ router.get('/auth/google',
 router.get('/oauth2/redirect/google',
     passport.authenticate('google', { failureRedirect: '/login' }),
     (req, res) => {
-        res.redirect('/chat/messages');
+        res.redirect('/chat');
     });
 
 export default router
