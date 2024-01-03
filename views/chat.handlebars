@@ -29,7 +29,7 @@
                         <div class="d-flex align-items-center py-1">
                             <div class="position-relative">
                                 <img id="selectedAccountImg" src="{{firstUserPicture}}" class="rounded-circle mr-1"
-                                    alt="Sharon Lessman" width="40" height="40">
+                                    alt="No Friends" width="40" height="40">
                             </div>
                             <div class="flex-grow-1 pl-3">
                                 <strong id="selectedAccountName">{{firstUserName}}</strong>
@@ -104,10 +104,14 @@
         const filtredArray = accounts.filter(user => user.userID === userID)
         return filtredArray[0].username
     }
+
     const getTime = () => {
-        const now = new Date()
-        return `${now.getHours()}:${now.getMinutes()}`
-    }
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const paddedMinutes = String(minutes).padStart(2, '0');
+        return `${hours}:${paddedMinutes}`;
+    };
 
     const updateMessages = (message, userID, fromSelf) => {
         //retrieve the sender account
