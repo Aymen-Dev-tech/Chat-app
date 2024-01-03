@@ -1,10 +1,10 @@
 # Chat app
 
-A Real time Chatting app using socket.io and express/node.js
+A Real time Chatting app using socket.io and express/node.js.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine.
 
 ### Prerequisites
 
@@ -17,7 +17,7 @@ Facbook Developer tool account
 Hosted DB in  MongoDB Atlas
 ```
 
-Setup a .env file at the root level of your projet and specify these variables
+Setup a .env file at the root level of your projet and specify these variables: 
 
 ```
 PORT
@@ -32,19 +32,19 @@ JWT_SECRET
 
 ### Running
 
-Clone the repository
+Clone the repository: 
 
 ```
 $ git clone https://github.com/Aymen-Dev-tech/Chat-app.git
 ```
 
-Navigate to the project directory
+Navigate to the project directory: 
 
 ```
 $ cd Chat-app
 ```
 
-Start the server
+Start the server: 
 
 ```
 $ npm i && npm run startDev
@@ -55,7 +55,7 @@ $ npm i && npm run startDev
 - [Node.js](https://nodejs.org/en) - JavaScript runtime environment
 - [Express.js](https://expressjs.com/) - Minimalist web framework for Node.js
 - [Passport.js](https://www.passportjs.org/) - Used to authentication
-- [MongoDB](https://www.passportjs.org/) - Used to authentication
+- [MongoDB](https://www.passportjs.org/) - NoSQL database
 
 ## Authors
 
