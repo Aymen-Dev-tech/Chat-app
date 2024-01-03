@@ -27,7 +27,7 @@ router.get('/chat', checkAuth, async (req, res) => {
         })
     } catch (error) {
         console.log("error on /messages endpoint: ", error)
-        res.status(500).send(error);
+        res.status(403).send(error);
     }
 
 })
