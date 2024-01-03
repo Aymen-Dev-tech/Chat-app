@@ -57,6 +57,6 @@ $ npm i && npm run startDev
 - [Passport.js](https://www.passportjs.org/) - Used to authentication
 - [MongoDB](https://www.passportjs.org/) - NoSQL database
 
-## Authors
+## Author
 
 - **Aymen Bounnah** - [Aymen-Dev-tech](https://github.com/Aymen-Dev-tech)
