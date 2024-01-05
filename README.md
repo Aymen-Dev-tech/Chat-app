@@ -2,11 +2,14 @@
 
 A Real time Chatting app using socket.io and express/node.js.
 
-1. Landing page: 
+1. Landing page:
+
     - ![landing](/public/images/screenshots/landing.png)
-1. Login page: 
+1. Login page:
+
     - ![login](/public/images/screenshots/login.png)
-1. Chat page: 
+1. Chat page:
+
     - ![chat](/public/images/screenshots/chat.png)
 
 ## Getting Started
