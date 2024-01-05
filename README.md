@@ -47,7 +47,7 @@ $ cd Chat-app
 Start the server: 
 
 ```
-$ npm i && npm run startDev
+$ npm i && npm run start
 ```
 
 ## Built With

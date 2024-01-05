@@ -1,0 +1,136 @@
+/* CSS Variables */
+:root {
+    --normal-font: 400;
+    --bold-font: 600;
+    --bolder-font: 900;
+    --primary-color: #0652dd;
+    --secondary-color: #ea2027;
+    --line-height: 1.7rem;
+    --transition: 0.4s ease-in;
+}
+
+/* Smooth scroll effect */
+html {
+    scroll-behavior: smooth;
+    background-image: linear-gradient(to right, #3E7399, #69B7FF);
+}
+
+/* Resets */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: var(--transition);
+}
+
+body {
+    font-family: "Inter", sans-serf;
+}
+
+ul li {
+    list-style-type: none;
+}
+
+a {
+    text-decoration: none;
+    color: rgba(255, 255, 255, 1);
+}
+
+a:hover {
+    color: rgba(83, 142, 185, 1);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    margin-right: 4rem;
+    margin-left: 2rem;
+}
+
+.logo {
+    font-size: 26px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 1);
+
+}
+
+ul {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-item {
+    margin-left: 2rem;
+}
+
+.nav-link {
+    font-weight: var(--bold-font);
+    font-size: 14px;
+}
+
+.github-link {
+    display: inline-block;
+    width: 152px;
+    height: 56px;
+    border: none;
+    border-radius: 45px;
+    background-color: rgba(255, 255, 255, 0.28);
+    text-align: center;
+    line-height: 56px;
+
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15rem;
+    max-width: 1400px;
+    margin: 2rem auto -6rem;
+}
+
+h2.chat {
+    font-size: 90px;
+    margin-bottom: 1rem;
+    color: rgba(255, 255, 255, 1)
+}
+
+.hero p {
+    font-size: 20px;
+    margin-top: 2rem;
+    line-height: var(--line-height);
+    color: rgba(255, 255, 255, 1);
+}
+
+/* div.intro-text{
+    text-align: center;
+} */
+
+.btn {
+    margin-top: 4rem;
+    display: inline-block;
+    width: 198px;
+    height: 60px;
+    border: none;
+    font-size: 20px;
+    border-radius: 60px;
+    text-align: center;
+    line-height: 60px;
+    box-sizing: border-box;
+    color: #fff;
+}
+
+.green {
+    background-color: #1BDC51;
+    margin-right: 1.5rem;
+}
+
+.blue {
+    border-style: solid;
+    border-color: white;
+    border-width: 1px;
+    margin-right: 1.5rem;
+}
